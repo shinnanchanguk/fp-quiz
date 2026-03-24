@@ -80,6 +80,20 @@ h1{font-size:1.8rem;font-weight:700;text-align:center;color:#7c4dff;margin-botto
 .del-btn:hover{background:#fce4ec}
 @media(max-width:600px){.container{padding:14px}.card{padding:20px;border-radius:16px}h1{font-size:1.5rem}.q-text{font-size:.93rem}.option-btn{padding:12px 14px;font-size:.85rem}.tab-btn{font-size:.8rem;padding:10px 6px}}
 /* 화면보호기 */
+/* 💌 편지 버튼 */
+.letter-wrap{position:fixed;bottom:20px;right:76px;z-index:9998}
+.letter-btn{width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#f48fb1,#ff80ab);color:#fff;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 15px rgba(244,143,177,.4);transition:.3s;display:flex;align-items:center;justify-content:center;position:relative}
+.letter-btn:hover{transform:scale(1.1);box-shadow:0 6px 20px rgba(244,143,177,.5)}
+.letter-btn:active{transform:scale(.95)}
+.letter-badge{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:#ff1744;color:#fff;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(255,23,68,.4);animation:badgePulse 2s infinite}
+@keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.letter-bubble{display:none;position:fixed;bottom:78px;right:20px;width:300px;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-radius:20px;padding:24px;box-shadow:0 8px 30px rgba(244,143,177,.25);z-index:9999;animation:bubbleIn .3s ease}
+.letter-bubble::after{content:'';position:absolute;bottom:-10px;right:40px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:12px solid rgba(255,255,255,.95)}
+@keyframes bubbleIn{from{opacity:0;transform:translateY(10px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.letter-bubble .letter-close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:1rem;color:#ccc;cursor:pointer}
+.letter-bubble .letter-greeting{font-size:1.05rem;font-weight:700;color:#f48fb1;margin-bottom:10px}
+.letter-bubble .letter-body{font-size:.88rem;color:#555;line-height:1.7}
+.letter-bubble .letter-from{text-align:right;font-size:.78rem;color:#b388ff;margin-top:12px;font-weight:500}
 .ss-wrap{position:fixed;bottom:20px;right:20px;z-index:9998;display:flex;flex-direction:column;align-items:center;gap:0}
 .ss-btn{width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#b388ff,#ea80fc);color:#fff;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 15px rgba(179,136,255,.4);transition:.3s;display:flex;align-items:center;justify-content:center}
 .ss-btn:hover{transform:scale(1.1);box-shadow:0 6px 20px rgba(179,136,255,.5)}
@@ -169,6 +183,17 @@ h1{font-size:1.8rem;font-weight:700;text-align:center;color:#7c4dff;margin-botto
 </div>
 </div>
 </div>
+</div>
+
+<!-- 💌 편지 -->
+<div class="letter-wrap">
+<button class="letter-btn" id="letterBtn" onclick="toggleLetter()">💌<span class="letter-badge" id="letterBadge">1</span></button>
+</div>
+<div class="letter-bubble" id="letterBubble">
+<button class="letter-close" onclick="closeLetter()">✕</button>
+<div class="letter-greeting" id="letterGreeting"></div>
+<div class="letter-body" id="letterBody"></div>
+<div class="letter-from" id="letterFrom"></div>
 </div>
 
 <!-- 화면보호기 -->
@@ -663,8 +688,28 @@ function showResult(){document.getElementById('quizScreen').classList.add('hidde
 
 function copyPrompt(){const t=document.getElementById('promptText').textContent;navigator.clipboard.writeText(t).then(()=>{const b=document.querySelector('#promptBox .copy-btn');b.textContent='✅ 복사 완료!';setTimeout(()=>b.textContent='📋 프롬프트 복사하기',2e3)})}
 function copyT(b){const t=b.previousElementSibling.textContent;navigator.clipboard.writeText(t).then(()=>{b.textContent='✅ 복사 완료!';setTimeout(()=>b.textContent='📋 프롬프트 복사',2e3)})}
-function goHome(){document.getElementById('resultScreen').classList.add('hidden');document.getElementById('quizScreen').classList.add('hidden');document.getElementById('startScreen').classList.remove('hidden')}
 init();
+
+// ===== 💌 편지 =====
+const LETTERS=[
+{g:"정은아! 💕",b:"오늘도 공부하러 왔구나?\n넌 이미 대단한 거야.\n꾸준히 하는 게 제일 어려운 건데,\n넌 그걸 해내고 있잖아.",f:"널 응원하는 마음을 담아 💜"},
+{g:"정은아! ✨",b:"힘들 때도 있겠지만,\n지금 이 순간 공부하고 있는 너는\n미래의 너한테 최고의 선물을 주고 있는 거야.",f:"합격한 너의 모습을 상상하며 🌸"},
+{g:"정은아! 🍀",b:"FP 시험? 너라면 할 수 있어.\n한 문제 한 문제가\n합격에 한 걸음씩 가까워지는 거야.\n오늘도 파이팅!",f:"항상 믿고 있어 💪"},
+{g:"정은아! 🌟",b:"완벽하지 않아도 괜찮아.\n틀린 문제가 있다는 건\n배울 게 남아있다는 뜻이니까.\n그게 바로 성장이야!",f:"한 걸음씩, 천천히 🌈"},
+{g:"정은아! 🎀",b:"공부가 지루할 수도 있어.\n근데 지금 이 시간이 지나면\n자격증 들고 웃고 있는 네가 있을 거야.\n그날이 곧 와!",f:"그날을 함께 기다리며 🎉"},
+{g:"정은아! 💐",b:"오늘 하루도 수고했어.\n많이 못 풀어도 괜찮아.\n앱을 열었다는 것만으로도\n넌 이미 반은 한 거야!",f:"오늘의 너에게 박수 👏"},
+{g:"정은아! 🌷",b:"시험 날짜가 다가올수록\n불안할 수도 있어.\n근데 그건 네가 진심이라는 뜻이야.\n진심은 반드시 결과로 돌아와.",f:"너의 진심을 응원해 ❤️"},
+{g:"정은아! 🧁",b:"잠깐 쉬어가도 돼.\n쉬는 것도 공부의 일부야.\n충전하고 다시 오면\n더 잘 풀릴 거야!",f:"쉬는 것도 실력이야 ☕"},
+{g:"정은아! 🌻",b:"매일 조금씩이라도 하는 너,\n정말 멋있어.\n작은 습관이 큰 결과를 만든다는 거\n넌 이미 알고 있지?",f:"꾸준함이 최고의 무기야 🔥"},
+{g:"정은아! 🎈",b:"합격하고 나면 이 시간이\n제일 뿌듯한 기억이 될 거야.\n'그때 진짜 열심히 했지' 하면서\n웃을 수 있을 거야.",f:"미래의 너가 고마워할 거야 😊"},
+{g:"정은아! 💎",b:"남들이랑 비교하지 마.\n너의 속도로 가면 돼.\n중요한 건 멈추지 않는 거야.\n넌 충분히 잘하고 있어.",f:"너의 페이스를 믿어 🐢💨"},
+{g:"정은아! 🍡",b:"이 떡 아이콘 보일 때마다 기억해.\n합격 떡 돌리는 그날!\n넌 반드시 해낼 수 있어.\n나는 확신해.",f:"합격 떡 미리 예약 📝🍡"},
+];
+let letterOpen=false;
+function toggleLetter(){if(letterOpen){closeLetter();return}const m=LETTERS[Math.floor(Math.random()*LETTERS.length)];document.getElementById('letterGreeting').textContent=m.g;document.getElementById('letterBody').textContent=m.b;document.getElementById('letterFrom').textContent=m.f;document.getElementById('letterBubble').style.display='block';document.getElementById('letterBadge').style.display='none';letterOpen=true}
+function closeLetter(){document.getElementById('letterBubble').style.display='none';letterOpen=false}
+document.addEventListener('click',function(e){if(letterOpen&&!e.target.closest('.letter-bubble')&&!e.target.closest('.letter-btn'))closeLetter()});
+function goHome(){document.getElementById('resultScreen').classList.add('hidden');document.getElementById('quizScreen').classList.add('hidden');document.getElementById('startScreen').classList.remove('hidden');document.getElementById('letterBadge').style.display='flex'}
 
 // ===== 화면보호기 =====
 let ssActive=false,ssSetupOpen=false;
