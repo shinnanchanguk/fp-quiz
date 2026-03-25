@@ -471,7 +471,7 @@ const Q=[
 // [계산] 트레이너지수
 {c:"2부-주식투자",q:"포트폴리오 수익률 15%, 무위험이자율 5%, 베타 1.25일 때 트레이너지수는?",o:["6%","7%","8%","9%","10%"],a:2,s:"트레이너=(15-5)/1.25=10/1.25=8%"},
 // [계산] 젠센 알파
-{c:"2부-주식투자",q:"펀드수익률 14%, 무위험 4%, 베타 1.2, 시장수익률 10%일 때 젠센알파는?",o:["0.4%","0.6%","0.8%","1.0%","2.8%"],a:3,s:"알파=(14-4)-1.2×(10-4)=10-7.2=2.8%. 문제 오류 아닌지 확인→2.8%"},
+{c:"2부-주식투자",q:"펀드수익률 14%, 무위험 4%, 베타 1.2, 시장수익률 10%일 때 젠센알파는?",o:["0.4%","0.6%","0.8%","1.0%","2.8%"],a:4,s:"알파=(14-4)-1.2×(10-4)=10-7.2=2.8%"},
 {c:"2부-주식투자",q:"정보비율이 측정하는 것은?",o:["총위험 대비 초과수익","체계적위험 대비 초과수익","비체계적위험 대비 초과수익(펀드매니저 능력)","시장수익률","벤치마크 수익률"],a:2,s:"정보비율=초과수익률/잔차표준편차→펀드매니저 능력 측정"},
 {c:"2부-주식투자",q:"소극적 투자전략인 편중(적립식)투자법의 특징은?",o:["단기에 효과 큼","정기적으로 일정금액 투자","소수 종목 집중","시장 타이밍 포착","고비용"],a:1,s:"편중투자법: 주가등락 관계없이 정기적 일정금액 투자. 장기에 효과"},
 {c:"2부-주식투자",q:"적극적 전략 중 '이례적 현상 이용'에 해당하지 않는 것은?",o:["기업규모 효과","저PER 효과","1월 효과","주말 효과","인덱스 추종"],a:4,s:"이례적 현상: 기업규모, 저PER/PBR, 소외기업, 1월효과, 주말효과"},
@@ -599,17 +599,17 @@ const Q=[
 {c:"1부-세무설계",q:"납부할 세액 1,000만원 무신고(일반) 시 가산세는?",o:["100만원","150만원","200만원","300만원","400만원"],a:2,s:"무신고 일반: 1000만×20%=200만원"},
 {c:"1부-세무설계",q:"미납세액 500만원, 미납기간 100일일 때 납부지연 가산세는?",o:["10만원","11만원","12만원","15만원","20만원"],a:1,s:"500만×0.022%×100일=500만×0.00022×100=11만원"},
 {c:"1부-세무설계",q:"순금융재산가액 1억원일 때 금융재산 상속공제액은?",o:["1천만원","2천만원","3천만원","4천만원","5천만원"],a:1,s:"2천만원 초과이므로 1억×20%=2천만원. 공제 최소 2천만원이므로 2천만원"},
-{c:"1부-세무설계",q:"순금융재산가액 5억원일 때 금융재산 상속공제액은?",o:["5천만원","1억원","1.5억원","2억원","2.5억원"],a:3,s:"5억×20%=1억이나 한도 2억이므로 1억. 아, 재확인: 5억×20%=1억. 한도2억이므로 1억원"},
+{c:"1부-세무설계",q:"순금융재산가액 5억원일 때 금융재산 상속공제액은?",o:["5천만원","1억원","1.5억원","2억원","2.5억원"],a:1,s:"5억×20%=1억원. 한도 2억원 이내이므로 공제액은 1억원"},
 {c:"1부-세무설계",q:"상속재산 30억, 배우자 상속분 8억일 때 배우자 공제액은?",o:["5억","8억","10억","15억","30억"],a:1,s:"배우자 실제 상속분 8억→8억 공제(최소5억, 최대30억 범위 내)"},
-{c:"1부-세무설계",q:"현재 5세 장애인의 상속세 미성년자 공제+장애인 공제 합계는?(기대여명 70년)",o:["1.4억","7억","7.14억","8.4억","8.54억"],a:3,s:"미성년자: 1천만×(19-5)=1.4억. 장애인: 1천만×70년=7억. 합계=8.4억. 아, 장애인은 중복가능이므로 1.4+7=8.4억이나, 문제가 미성년자+장애인이면 둘 다 합산. 재확인→1.4억+7억=8.4억"},
+{c:"1부-세무설계",q:"현재 5세 장애인의 상속세 미성년자 공제+장애인 공제 합계는?(기대여명 70년)",o:["1.4억","7억","7.14억","8.4억","8.54억"],a:3,s:"미성년자 공제=1천만원×(19-5)=1.4억원, 장애인 공제=1천만원×70년=7억원, 합계=8.4억원"},
 {c:"1부-보험은퇴",q:"국민연금 보험료 계산: 기준소득월액 300만원, 사업장가입자일 때 본인 부담액은?",o:["12만원","13.5만원","15만원","18만원","27만원"],a:1,s:"본인: 300만×4.5%=13.5만원"},
-{c:"1부-보험은퇴",q:"기초연금 소득평가액: 근로소득 300만원, 기타소득 30만원일 때?",o:["131.6만원","141.6만원","151.6만원","161.6만원","171.6만원"],a:0,s:"0.7×(300-112)+30=0.7×188+30=131.6+30=161.6만원. 아 재계산: 0.7×(300-112)=0.7×188=131.6. +30=161.6"},
+{c:"1부-보험은퇴",q:"기초연금 소득평가액: 근로소득 300만원, 기타소득 30만원일 때?",o:["131.6만원","141.6만원","151.6만원","161.6만원","171.6만원"],a:3,s:"소득평가액=0.7×(300-112)+30=0.7×188+30=131.6+30=161.6만원"},
 {c:"1부-보험은퇴",q:"보험금 2억, 총보험료 8천만원 중 배우자가 6천만원 납부 시 증여재산가액은?",o:["1억","1.2억","1.5억","1.6억","2억"],a:2,s:"2억×(6천만/8천만)=2억×0.75=1.5억"},
 {c:"1부-보험은퇴",q:"산재보험 장의비: 평균임금 10만원일 때 장의비는?",o:["600만원","900만원","1,000만원","1,200만원","1,500만원"],a:3,s:"장의비=평균임금×120일=10만×120=1,200만원"},
 {c:"1부-보험은퇴",q:"산재 휴업급여: 평균임금 10만원, 30일 취업불능 시 휴업급여 총액은?",o:["150만원","180만원","200만원","210만원","250만원"],a:3,s:"10만×70%×30일=7만×30=210만원"},
 // 1부 계산문제 추가 보충 (20% 달성용)
 {c:"1부-재산관리",q:"65세 이상 1,200만명, 15~64세 3,600만명일 때 노령화지수는?(소수점 반올림)",o:["25","28","30","33","36"],a:3,s:"노령화지수=1200/3600×100=33.3≒33"},
-{c:"1부-거시경제",q:"노동가능인구 4,000만, 비경제활동인구 1,400만일 때 경제활동인구는?",o:["2,000만","2,200만","2,400만","2,600만","2,800만"],a:2,s:"경제활동인구=노동가능인구-비경제활동=4000-1400=2600만"},
+{c:"1부-거시경제",q:"노동가능인구 4,000만, 비경제활동인구 1,400만일 때 경제활동인구는?",o:["2,000만","2,200만","2,400만","2,600만","2,800만"],a:3,s:"경제활동인구=노동가능인구-비경제활동인구=4000-1400=2600만"},
 {c:"1부-환율경기",q:"현금비율 0.15, 지급준비율 0.05일 때 통화승수는?",o:["4.25","5.00","5.75","6.00","6.50"],a:2,s:"(1+0.15)/(0.15+0.05)=1.15/0.2=5.75"},
 {c:"1부-환율경기",q:"BSI 계산: 긍정 200개, 부정 100개, 전체 500개일 때 BSI는?",o:["105","110","115","120","125"],a:3,s:"((200-100)/500)×100+100=(100/500)×100+100=20+100=120"},
 {c:"1부-세무설계",q:"배우자 공제액 계산: 상속재산 총 50억, 배우자 법정상속분 20억 실제상속 시 공제액은?",o:["5억","10억","15억","20억","30억"],a:3,s:"배우자 실제 상속분 20억→20억 공제(최소5억~최대30억 범위)"},
@@ -663,6 +663,8 @@ function renderNB(){const nb=getNB(),ct=document.getElementById('noteContent'),s
 
 function mkPrompt(w){const nm=['①','②','③','④','⑤'];return`아래는 FP(재무설계사) 시험 요점정리 내용입니다:\n\n---\n${w.s}\n---\n\n위 내용을 기반으로, 아래 문제에 대해 해설해주세요:\n\n문제: ${w.q}\n${w.o.map((o,i)=>`${nm[i]} ${o}`).join('\n')}\n\n정답: ${nm[w.a]} ${w.o[w.a]}\n내가 선택한 답: ${nm[w.ua]} ${w.o[w.ua]}\n\n왜 내 답이 틀렸는지, 정답이 맞는 이유를 요점정리 내용 기반으로 상세히 설명해주세요.`}
 
+function mkPromptCorrect(w){const nm=['①','②','③','④','⑤'];return`아래는 FP(재무설계사) 시험 요점정리 내용입니다:\n\n---\n${w.s}\n---\n\n위 내용을 기반으로, 아래 문제에 대해 해설해주세요:\n\n문제: ${w.q}\n${w.o.map((o,i)=>`${nm[i]} ${o}`).join('\n')}\n\n정답: ${nm[w.a]} ${w.o[w.a]}\n\n정답인 이유와 나머지 선택지가 왜 틀린지 요점정리 내용 기반으로 상세히 설명해주세요.`}
+
 // ===== 퀴즈 로직 =====
 let selCats=new Set(),cQuiz=[],cIdx=0,score=0,wrongs=[],answered=false,qTotal=10;
 const cats=[...new Set(Q.map(q=>q.c))].sort();
@@ -680,7 +682,7 @@ function startQuiz(mode){let pool;if(mode==='wrong'){const nb=getNB();pool=(nf==
 
 function renderQ(){answered=false;const q=cQuiz[cIdx];document.getElementById('progressText').textContent=`${cIdx+1} / ${qTotal}`;document.getElementById('progressBar').style.width=((cIdx+1)/qTotal*100)+'%';document.getElementById('qNum').textContent=cIdx+1;document.getElementById('qText').innerHTML=`<strong>[${q.c}]</strong> ${q.q}`;const w=document.getElementById('optionsWrap');w.innerHTML='';const nm=['①','②','③','④','⑤'];q.o.forEach((opt,i)=>{const b=document.createElement('button');b.className='option-btn';b.innerHTML=`<span class="option-num">${nm[i]}</span>${opt}`;b.onclick=()=>selAns(i);w.appendChild(b)});document.getElementById('promptBox').style.display='none';document.getElementById('nextBtn').style.display='none'}
 
-function selAns(idx){if(answered)return;answered=true;const q=cQuiz[cIdx],bs=document.querySelectorAll('.option-btn'),nm=['①','②','③','④','⑤'];bs.forEach(b=>b.classList.add('disabled'));if(idx===q.a){bs[idx].classList.add('correct');score++}else{bs[idx].classList.add('wrong');bs[q.a].classList.add('show-answer');wrongs.push({...q,ua:idx});addNB(q,idx);const pr=mkPrompt({...q,ua:idx});document.getElementById('promptText').textContent=pr;document.getElementById('promptBox').style.display='block'}const nb=document.getElementById('nextBtn');nb.style.display='block';nb.textContent=cIdx<qTotal-1?'다음 문제 →':'결과 보기 ✨'}
+function selAns(idx){if(answered)return;answered=true;const q=cQuiz[cIdx],bs=document.querySelectorAll('.option-btn'),nm=['①','②','③','④','⑤'];bs.forEach(b=>b.classList.add('disabled'));if(idx===q.a){bs[idx].classList.add('correct');score++;const pr=mkPromptCorrect({...q,ua:idx});document.getElementById('promptText').textContent=pr;document.getElementById('promptBox').style.display='block'}else{bs[idx].classList.add('wrong');bs[q.a].classList.add('show-answer');wrongs.push({...q,ua:idx});addNB(q,idx);const pr=mkPrompt({...q,ua:idx});document.getElementById('promptText').textContent=pr;document.getElementById('promptBox').style.display='block'}const nb=document.getElementById('nextBtn');nb.style.display='block';nb.textContent=cIdx<qTotal-1?'다음 문제 →':'결과 보기 ✨'}
 
 function nextQuestion(){cIdx++;if(cIdx>=qTotal)showResult();else renderQ()}
 
