@@ -144,7 +144,8 @@ h1{font-size:1.8rem;font-weight:700;text-align:center;color:#7c4dff;margin-botto
 <div class="category-grid" id="diffGrid"></div>
 </div>
 <div class="count-info" id="countInfo"></div>
-<button class="start-btn" onclick="startQuiz('normal')">테스트 시작하기 →</button>
+<button class="start-btn" onclick="startQuiz('normal')">테스트 시작하기 (10문제) →</button>
+<button class="start-btn secondary" onclick="startQuiz('all')" style="margin-top:10px">📝 전체 문제 풀기</button>
 </div>
 </div>
 <div id="quizScreen" class="hidden">
@@ -160,6 +161,7 @@ h1{font-size:1.8rem;font-weight:700;text-align:center;color:#7c4dff;margin-botto
 <button class="copy-btn" onclick="copyPrompt()">📋 프롬프트 복사하기</button>
 </div>
 <button class="next-btn" id="nextBtn" onclick="nextQuestion()">다음 문제 →</button>
+<button class="next-btn" id="quitBtn" style="display:block;background:linear-gradient(135deg,#e0e0e0,#bdbdbd);color:#666;font-size:.82rem;margin-top:8px" onclick="quitQuiz()">🏠 메인으로 (푼 데까지 저장)</button>
 </div>
 </div>
 <div id="resultScreen" class="hidden">
@@ -1067,10 +1069,11 @@ function togF(b,f){document.querySelectorAll('.cat-btn').forEach(x=>x.classList.
 function togC(b,c){document.querySelectorAll('.cat-btn').forEach(x=>{if(x.dataset.f)x.classList.remove('active')});b.classList.toggle('active');if(selCats.has('전체')||selCats.has('1부')||selCats.has('2부'))selCats.clear();if(selCats.has(c))selCats.delete(c);else selCats.add(c);if(!selCats.size){selCats.add('전체');document.querySelector('[data-f="전체"]').classList.add('active')}updCnt()}
 
 function getFQ(){let pool;if(selCats.has('전체'))pool=[...Q];else if(selCats.has('1부'))pool=Q.filter(q=>q.c.startsWith('1부'));else if(selCats.has('2부'))pool=Q.filter(q=>q.c.startsWith('2부'));else pool=Q.filter(q=>selCats.has(q.c));if(selDiff==='기존')return pool.filter(q=>!q.d||q.d===1);if(selDiff==='NEW')return pool.filter(q=>q.d===2);return pool}
-function updCnt(){const f=getFQ();const nw=f.filter(q=>q.d===2).length;const extra=nw>0?` (NEW ${nw}문제 포함)`:'';document.getElementById('countInfo').textContent=`총 ${f.length}문제 중 랜덤 ${Math.min(10,f.length)}문제 출제${extra}`}
+function updCnt(){const f=getFQ();const nw=f.filter(q=>q.d===2).length;const extra=nw>0?` (NEW ${nw}문제 포함)`:'';document.getElementById('countInfo').textContent=`총 ${f.length}문제${extra}`}
 function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 
-function startQuiz(mode){let pool;if(mode==='wrong'){const nb=getNB();pool=(nf==='전체'?nb:nb.filter(n=>n.c===nf)).map(n=>Q.find(q=>q.q===n.q)||n);if(!pool.length){alert('틀린 문제가 없어요!');return}}else{pool=getFQ()}qTotal=Math.min(10,pool.length);if(pool.length<1){alert('문제가 없습니다.');return}cQuiz=shuf(pool).slice(0,qTotal);cIdx=0;score=0;wrongs=[];answered=false;switchTab('quiz');document.getElementById('startScreen').classList.add('hidden');document.getElementById('resultScreen').classList.add('hidden');document.getElementById('quizScreen').classList.remove('hidden');renderQ()}
+function startQuiz(mode){let pool;if(mode==='wrong'){const nb=getNB();pool=(nf==='전체'?nb:nb.filter(n=>n.c===nf)).map(n=>Q.find(q=>q.q===n.q)||n);if(!pool.length){alert('틀린 문제가 없어요!');return}}else{pool=getFQ()}if(mode==='all'){qTotal=pool.length;if(pool.length<1){alert('문제가 없습니다.');return}cQuiz=shuf(pool)}else{qTotal=Math.min(10,pool.length);if(pool.length<1){alert('문제가 없습니다.');return}cQuiz=shuf(pool).slice(0,qTotal)}cIdx=0;score=0;wrongs=[];answered=false;switchTab('quiz');document.getElementById('startScreen').classList.add('hidden');document.getElementById('resultScreen').classList.add('hidden');document.getElementById('quizScreen').classList.remove('hidden');renderQ()}
+function quitQuiz(){if(!confirm(`${cIdx}문제까지 푼 결과를 저장하고 나갈까요?`))return;goHome()}
 
 function renderQ(){answered=false;const q=cQuiz[cIdx];document.getElementById('progressText').textContent=`${cIdx+1} / ${qTotal}`;document.getElementById('progressBar').style.width=((cIdx+1)/qTotal*100)+'%';document.getElementById('qNum').textContent=cIdx+1;document.getElementById('qText').innerHTML=`<strong>[${q.c}]</strong>${q.d===2?' <span class="new-badge">NEW</span>':''} ${q.q}`;const w=document.getElementById('optionsWrap');w.innerHTML='';const nm=['①','②','③','④','⑤'];q.o.forEach((opt,i)=>{const b=document.createElement('button');b.className='option-btn';b.innerHTML=`<span class="option-num">${nm[i]}</span>${opt}`;b.onclick=()=>selAns(i);w.appendChild(b)});document.getElementById('promptBox').style.display='none';document.getElementById('nextBtn').style.display='none'}
 
