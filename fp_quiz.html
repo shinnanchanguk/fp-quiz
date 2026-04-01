@@ -120,6 +120,8 @@ h1{font-size:1.8rem;font-weight:700;text-align:center;color:#7c4dff;margin-botto
 .ss-remove{padding:6px;border:1px solid #ef9a9a;border-radius:8px;background:#fff;color:#ef9a9a;font-size:.72rem;cursor:pointer;width:100%;font-family:inherit;margin-top:6px;transition:.2s}
 .ss-remove:hover{background:#fce4ec}
 </style>
+<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-database-compat.js"></script>
 </head>
 <body>
 <div class="container">
@@ -1040,13 +1042,27 @@ const Q=[
 {c:"2부-부동산",q:"부동산 관리방식 중 소유자가 직접 관리하는 방식은?",o:["위탁관리","혼합관리","자치관리","신탁관리","공동관리"],a:2,s:"자치관리=소유자 직접, 위탁관리=전문업체 위탁, 혼합관리=자치+위탁 결합",d:2}
 ];
 
-// ===== 오답노트(localStorage) =====
+// ===== Firebase 초기화 =====
+firebase.initializeApp({
+  apiKey:"AIzaSyCgaZTrhN_LIrsZvCEbS_n_TUG8h8NJAbk",
+  authDomain:"quiz-fdbed.firebaseapp.com",
+  databaseURL:"https://quiz-fdbed-default-rtdb.firebaseio.com",
+  projectId:"quiz-fdbed",
+  storageBucket:"quiz-fdbed.firebasestorage.app",
+  messagingSenderId:"385987458028",
+  appId:"1:385987458028:web:2a7522beace0549e3ec6c9"
+});
+const fbDB=firebase.database();
+
+// ===== 오답노트(Firebase + localStorage) =====
 function getNB(){try{return JSON.parse(localStorage.getItem('fp_nb')||'[]')}catch(e){return[]}}
-function saveNB(n){localStorage.setItem('fp_nb',JSON.stringify(n))}
+function saveNB(n){localStorage.setItem('fp_nb',JSON.stringify(n));fbDB.ref('notebook').set(n)}
 function addNB(q,ua){const n=getNB(),k=q.q,e=n.find(x=>x.q===k);if(e){e.cnt++;e.d=new Date().toLocaleDateString('ko-KR');e.ua=ua}else{n.push({...q,ua,cnt:1,d:new Date().toLocaleDateString('ko-KR')})}saveNB(n);updBadge()}
 function delNB(q){saveNB(getNB().filter(x=>x.q!==q));updBadge();renderNB()}
-function clearNotebook(){if(!confirm('오답노트를 모두 지울까요?'))return;localStorage.removeItem('fp_nb');updBadge();renderNB()}
+function clearNotebook(){if(!confirm('오답노트를 모두 지울까요?'))return;localStorage.removeItem('fp_nb');fbDB.ref('notebook').remove();updBadge();renderNB()}
 function updBadge(){document.getElementById('noteBadge').textContent=getNB().length}
+// Firebase → localStorage 동기화 (페이지 로드 시)
+fbDB.ref('notebook').once('value').then(snap=>{const d=snap.val();if(d&&Array.isArray(d)){localStorage.setItem('fp_nb',JSON.stringify(d));updBadge();if(!document.getElementById('notebookTab').classList.contains('hidden'))renderNB()}})
 
 // ===== 탭 =====
 function switchTab(t){document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',t==='quiz'?i===0:i===1));document.getElementById('quizTab').classList.toggle('hidden',t!=='quiz');document.getElementById('notebookTab').classList.toggle('hidden',t!=='notebook');if(t==='notebook')renderNB()}
@@ -1117,6 +1133,8 @@ const fit=localStorage.getItem('fp_ss_fit')||'contain';
 if(img){document.getElementById('ssImg').src=img;renderSSPreview(img);document.getElementById('ssRemoveBtn').style.display='block';ssSetupShown=true}
 if(localStorage.getItem('fp_ss_setup_done'))ssSetupShown=true;
 if(fit==='cover'){document.getElementById('ssOverlay').classList.add('cover');document.getElementById('ssFitCover').classList.add('active');document.getElementById('ssFitContain').classList.remove('active')}
+// Firebase에서 화면보호기 동기화
+fbDB.ref('screensaver').once('value').then(snap=>{const d=snap.val();if(!d)return;if(d.img&&!localStorage.getItem('fp_ss_img')){localStorage.setItem('fp_ss_img',d.img);document.getElementById('ssImg').src=d.img;renderSSPreview(d.img);document.getElementById('ssRemoveBtn').style.display='block';ssSetupShown=true}if(d.fit){localStorage.setItem('fp_ss_fit',d.fit);if(d.fit==='cover'){document.getElementById('ssOverlay').classList.add('cover');document.getElementById('ssFitCover').classList.add('active');document.getElementById('ssFitContain').classList.remove('active')}}})
 }
 function toggleSS(){
 if(ssActive){hideSS();return}
@@ -1145,7 +1163,7 @@ const file=e.target.files[0];if(!file)return;
 const reader=new FileReader();
 reader.onload=function(ev){
 const data=ev.target.result;
-try{localStorage.setItem('fp_ss_img',data)}catch(err){alert('이미지가 너무 큽니다. 더 작은 이미지를 사용해주세요.');return}
+try{localStorage.setItem('fp_ss_img',data);fbDB.ref('screensaver/img').set(data)}catch(err){alert('이미지가 너무 큽니다. 더 작은 이미지를 사용해주세요.');return}
 document.getElementById('ssImg').src=data;
 renderSSPreview(data);
 document.getElementById('ssRemoveBtn').style.display='block';
@@ -1158,14 +1176,14 @@ const w=document.getElementById('ssPreviewWrap');
 w.innerHTML=`<img class="ss-preview" src="${data}" alt="미리보기">`;
 }
 function setSSFit(mode){
-localStorage.setItem('fp_ss_fit',mode);
+localStorage.setItem('fp_ss_fit',mode);fbDB.ref('screensaver/fit').set(mode);
 const ov=document.getElementById('ssOverlay');
 if(mode==='cover'){ov.classList.add('cover')}else{ov.classList.remove('cover')}
 document.getElementById('ssFitContain').classList.toggle('active',mode==='contain');
 document.getElementById('ssFitCover').classList.toggle('active',mode==='cover');
 }
 function removeSSImage(){
-localStorage.removeItem('fp_ss_img');
+localStorage.removeItem('fp_ss_img');fbDB.ref('screensaver/img').remove();
 document.getElementById('ssImg').src='';
 document.getElementById('ssPreviewWrap').innerHTML='';
 document.getElementById('ssRemoveBtn').style.display='none';
