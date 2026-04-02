@@ -79,6 +79,22 @@ h1{font-size:1.8rem;font-weight:700;text-align:center;color:#7c4dff;margin-botto
 .note-filter-btn.active{background:#e1bee7;color:#6a1b9a}
 .del-btn{background:0 0;border:1px solid #ef9a9a;color:#ef9a9a;padding:4px 10px;border-radius:8px;font-size:.7rem;cursor:pointer;font-family:inherit;margin-left:8px;transition:.2s}
 .del-btn:hover{background:#fce4ec}
+/* 안 푼 문제 토글 */
+.unsolved-toggle{display:flex;align-items:center;gap:8px;margin-top:14px;justify-content:center}
+.unsolved-toggle label{font-size:.82rem;color:#7c4dff;font-weight:500;cursor:pointer}
+.toggle-switch{position:relative;width:44px;height:24px;cursor:pointer}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#e0e0e0;border-radius:24px;transition:.3s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.toggle-switch input:checked+.toggle-slider{background:linear-gradient(135deg,#b388ff,#ea80fc)}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(20px)}
+.unsolved-info{text-align:center;font-size:.78rem;color:#e57373;margin-top:6px;font-weight:500}
+.cat-stat{display:block;font-size:.68rem;color:#b388ff;margin-top:2px;font-weight:400}
+.cat-btn.active .cat-stat{color:rgba(255,255,255,.8)}
+.solved-progress{height:3px;background:#f3e5f5;border-radius:3px;margin-top:4px;overflow:hidden}
+.solved-progress-fill{height:100%;background:linear-gradient(90deg,#81c784,#66bb6a);border-radius:3px;transition:width .3s}
+.clear-solved-btn{background:0 0;border:1px solid #ce93d8;color:#ce93d8;padding:6px 14px;border-radius:10px;font-size:.72rem;cursor:pointer;font-family:inherit;transition:.2s;margin-top:8px}
+.clear-solved-btn:hover{background:#f3e5f5}
 @media(max-width:600px){.container{padding:14px}.card{padding:20px;border-radius:16px}h1{font-size:1.5rem}.q-text{font-size:.93rem}.option-btn{padding:12px 14px;font-size:.85rem}.tab-btn{font-size:.8rem;padding:10px 6px}}
 /* 화면보호기 */
 /* 💌 편지 버튼 */
@@ -146,8 +162,14 @@ h1{font-size:1.8rem;font-weight:700;text-align:center;color:#7c4dff;margin-botto
 <div class="category-grid" id="diffGrid"></div>
 </div>
 <div class="count-info" id="countInfo"></div>
+<div class="unsolved-toggle">
+<label class="toggle-switch"><input type="checkbox" id="unsolvedOnly" onchange="toggleUnsolved()"><span class="toggle-slider"></span></label>
+<label for="unsolvedOnly">안 푼 문제만</label>
+</div>
+<div class="unsolved-info" id="unsolvedInfo" style="display:none"></div>
 <button class="start-btn" onclick="startQuiz('normal')">테스트 시작하기 (10문제) →</button>
 <button class="start-btn secondary" onclick="startQuiz('all')" style="margin-top:10px">📝 전체 문제 풀기</button>
+<button class="clear-solved-btn" id="clearSolvedBtn" onclick="clearSolved()" style="display:none">🔄 풀이 기록 초기화</button>
 </div>
 </div>
 <div id="quizScreen" class="hidden">
@@ -1064,6 +1086,16 @@ function updBadge(){document.getElementById('noteBadge').textContent=getNB().len
 // Firebase → localStorage 동기화 (페이지 로드 시)
 fbDB.ref('notebook').once('value').then(snap=>{const d=snap.val();if(d&&Array.isArray(d)){localStorage.setItem('fp_nb',JSON.stringify(d));updBadge();if(!document.getElementById('notebookTab').classList.contains('hidden'))renderNB()}})
 
+// ===== 풀이 기록(Firebase + localStorage) =====
+function getSolved(){try{return JSON.parse(localStorage.getItem('fp_solved')||'[]')}catch(e){return[]}}
+function saveSolved(s){localStorage.setItem('fp_solved',JSON.stringify(s));fbDB.ref('solved').set(s)}
+function markSolved(q){const s=getSolved();if(!s.includes(q.q)){s.push(q.q);saveSolved(s)}updCnt()}
+function clearSolved(){if(!confirm('풀이 기록을 초기화할까요? 모든 문제가 "안 푼 문제"로 돌아갑니다.'))return;localStorage.removeItem('fp_solved');fbDB.ref('solved').remove();updCnt()}
+let unsolvedMode=false;
+function toggleUnsolved(){unsolvedMode=document.getElementById('unsolvedOnly').checked;updCnt()}
+// Firebase → localStorage 동기화 (풀이 기록)
+fbDB.ref('solved').once('value').then(snap=>{const d=snap.val();if(d&&Array.isArray(d)){localStorage.setItem('fp_solved',JSON.stringify(d));updCnt()}})
+
 // ===== 탭 =====
 function switchTab(t){document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',t==='quiz'?i===0:i===1));document.getElementById('quizTab').classList.toggle('hidden',t!=='quiz');document.getElementById('notebookTab').classList.toggle('hidden',t!=='notebook');if(t==='notebook')renderNB()}
 
@@ -1084,16 +1116,17 @@ function init(){const g=document.getElementById('catGrid');['전체','1부','2�
 function togF(b,f){document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');selCats.clear();selCats.add(f);updCnt()}
 function togC(b,c){document.querySelectorAll('.cat-btn').forEach(x=>{if(x.dataset.f)x.classList.remove('active')});b.classList.toggle('active');if(selCats.has('전체')||selCats.has('1부')||selCats.has('2부'))selCats.clear();if(selCats.has(c))selCats.delete(c);else selCats.add(c);if(!selCats.size){selCats.add('전체');document.querySelector('[data-f="전체"]').classList.add('active')}updCnt()}
 
-function getFQ(){let pool;if(selCats.has('전체'))pool=[...Q];else if(selCats.has('1부'))pool=Q.filter(q=>q.c.startsWith('1부'));else if(selCats.has('2부'))pool=Q.filter(q=>q.c.startsWith('2부'));else pool=Q.filter(q=>selCats.has(q.c));if(selDiff==='기존')return pool.filter(q=>!q.d||q.d===1);if(selDiff==='NEW')return pool.filter(q=>q.d===2);return pool}
-function updCnt(){const f=getFQ();const nw=f.filter(q=>q.d===2).length;const extra=nw>0?` (NEW ${nw}문제 포함)`:'';document.getElementById('countInfo').textContent=`총 ${f.length}문제${extra}`}
+function getFQ(){let pool;if(selCats.has('전체'))pool=[...Q];else if(selCats.has('1부'))pool=Q.filter(q=>q.c.startsWith('1부'));else if(selCats.has('2부'))pool=Q.filter(q=>q.c.startsWith('2부'));else pool=Q.filter(q=>selCats.has(q.c));if(selDiff==='기존')pool=pool.filter(q=>!q.d||q.d===1);else if(selDiff==='NEW')pool=pool.filter(q=>q.d===2);return pool}
+function getPool(){const pool=getFQ();if(!unsolvedMode)return pool;const s=getSolved();return pool.filter(q=>!s.includes(q.q))}
+function updCnt(){const all=getFQ();const s=getSolved();const unsolved=all.filter(q=>!s.includes(q.q));const solved=all.length-unsolved.length;const nw=all.filter(q=>q.d===2).length;const extra=nw>0?` (NEW ${nw}문제 포함)`:'';document.getElementById('countInfo').textContent=`총 ${all.length}문제${extra}`;const info=document.getElementById('unsolvedInfo');const clrBtn=document.getElementById('clearSolvedBtn');if(solved>0){info.style.display='block';info.textContent=unsolvedMode?`안 푼 문제 ${unsolved.length}문제로 출제됩니다`:`✅ ${solved}문제 풀었음 · 📌 ${unsolved.length}문제 남음`;clrBtn.style.display='inline-block'}else{info.style.display='none';clrBtn.style.display='none'}/* 카테고리 버튼에 진행률 표시 */document.querySelectorAll('#catGrid .cat-btn').forEach(b=>{const old=b.querySelector('.cat-stat');if(old)old.remove();const oldBar=b.querySelector('.solved-progress');if(oldBar)oldBar.remove();let cPool;const f=b.dataset.f,c=b.dataset.c;if(f==='전체')cPool=[...Q];else if(f==='1부')cPool=Q.filter(q=>q.c.startsWith('1부'));else if(f==='2부')cPool=Q.filter(q=>q.c.startsWith('2부'));else if(c)cPool=Q.filter(q=>q.c===c);else return;const cSolved=cPool.filter(q=>s.includes(q.q)).length;if(cSolved>0){const sp=document.createElement('span');sp.className='cat-stat';sp.textContent=`${cSolved}/${cPool.length}`;b.appendChild(sp);const bar=document.createElement('div');bar.className='solved-progress';bar.innerHTML=`<div class="solved-progress-fill" style="width:${(cSolved/cPool.length*100).toFixed(0)}%"></div>`;b.appendChild(bar)}})}
 function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 
-function startQuiz(mode){let pool;if(mode==='wrong'){const nb=getNB();pool=(nf==='전체'?nb:nb.filter(n=>n.c===nf)).map(n=>Q.find(q=>q.q===n.q)||n);if(!pool.length){alert('틀린 문제가 없어요!');return}}else{pool=getFQ()}if(mode==='all'){qTotal=pool.length;if(pool.length<1){alert('문제가 없습니다.');return}cQuiz=shuf(pool)}else{qTotal=Math.min(10,pool.length);if(pool.length<1){alert('문제가 없습니다.');return}cQuiz=shuf(pool).slice(0,qTotal)}cIdx=0;score=0;wrongs=[];answered=false;switchTab('quiz');document.getElementById('startScreen').classList.add('hidden');document.getElementById('resultScreen').classList.add('hidden');document.getElementById('quizScreen').classList.remove('hidden');renderQ()}
+function startQuiz(mode){let pool;if(mode==='wrong'){const nb=getNB();pool=(nf==='전체'?nb:nb.filter(n=>n.c===nf)).map(n=>Q.find(q=>q.q===n.q)||n);if(!pool.length){alert('틀린 문제가 없어요!');return}}else{pool=getPool();if(unsolvedMode&&!pool.length){alert('안 푼 문제가 없어요! 모두 풀었습니다 🎉');return}}if(mode==='all'){qTotal=pool.length;if(pool.length<1){alert('문제가 없습니다.');return}cQuiz=shuf(pool)}else{qTotal=Math.min(10,pool.length);if(pool.length<1){alert('문제가 없습니다.');return}cQuiz=shuf(pool).slice(0,qTotal)}cIdx=0;score=0;wrongs=[];answered=false;switchTab('quiz');document.getElementById('startScreen').classList.add('hidden');document.getElementById('resultScreen').classList.add('hidden');document.getElementById('quizScreen').classList.remove('hidden');renderQ()}
 function quitQuiz(){if(!confirm(`${cIdx}문제까지 푼 결과를 저장하고 나갈까요?`))return;goHome()}
 
 function renderQ(){answered=false;const q=cQuiz[cIdx];document.getElementById('progressText').textContent=`${cIdx+1} / ${qTotal}`;document.getElementById('progressBar').style.width=((cIdx+1)/qTotal*100)+'%';document.getElementById('qNum').textContent=cIdx+1;document.getElementById('qText').innerHTML=`<strong>[${q.c}]</strong>${q.d===2?' <span class="new-badge">NEW</span>':''} ${q.q}`;const w=document.getElementById('optionsWrap');w.innerHTML='';const nm=['①','②','③','④','⑤'];q.o.forEach((opt,i)=>{const b=document.createElement('button');b.className='option-btn';b.innerHTML=`<span class="option-num">${nm[i]}</span>${opt}`;b.onclick=()=>selAns(i);w.appendChild(b)});document.getElementById('promptBox').style.display='none';document.getElementById('nextBtn').style.display='none'}
 
-function selAns(idx){if(answered)return;answered=true;const q=cQuiz[cIdx],bs=document.querySelectorAll('.option-btn'),nm=['①','②','③','④','⑤'];bs.forEach(b=>b.classList.add('disabled'));if(idx===q.a){bs[idx].classList.add('correct');score++;const pr=mkPromptCorrect({...q,ua:idx});document.getElementById('promptText').textContent=pr;document.getElementById('promptBox').style.display='block'}else{bs[idx].classList.add('wrong');bs[q.a].classList.add('show-answer');wrongs.push({...q,ua:idx});addNB(q,idx);const pr=mkPrompt({...q,ua:idx});document.getElementById('promptText').textContent=pr;document.getElementById('promptBox').style.display='block'}const nb=document.getElementById('nextBtn');nb.style.display='block';nb.textContent=cIdx<qTotal-1?'다음 문제 →':'결과 보기 ✨'}
+function selAns(idx){if(answered)return;answered=true;const q=cQuiz[cIdx],bs=document.querySelectorAll('.option-btn'),nm=['①','②','③','④','⑤'];bs.forEach(b=>b.classList.add('disabled'));markSolved(q);if(idx===q.a){bs[idx].classList.add('correct');score++;const pr=mkPromptCorrect({...q,ua:idx});document.getElementById('promptText').textContent=pr;document.getElementById('promptBox').style.display='block'}else{bs[idx].classList.add('wrong');bs[q.a].classList.add('show-answer');wrongs.push({...q,ua:idx});addNB(q,idx);const pr=mkPrompt({...q,ua:idx});document.getElementById('promptText').textContent=pr;document.getElementById('promptBox').style.display='block'}const nb=document.getElementById('nextBtn');nb.style.display='block';nb.textContent=cIdx<qTotal-1?'다음 문제 →':'결과 보기 ✨'}
 
 function nextQuestion(){cIdx++;if(cIdx>=qTotal)showResult();else renderQ()}
 
